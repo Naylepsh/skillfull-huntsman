@@ -1,5 +1,7 @@
 ThisBuild / organization := "com.example"
-ThisBuild / scalaVersion := "3.0.0"
+ThisBuild / scalaVersion := "3.1.2"
+
+val circeVersion = "0.14.1"
 
 lazy val root = (project in file(".")).settings(
   name := "job-hunter",
@@ -12,6 +14,10 @@ lazy val root = (project in file(".")).settings(
     // standard "effect" library (Queues, Console, Random etc.)
     "org.typelevel" %% "cats-effect-std" % "3.3.12",
     "org.typelevel" %% "cats-effect-testing-specs2" % "1.4.0" % Test,
-    "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test
+    "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+    "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
+    "io.circe" %% "circe-core" % circeVersion,
+    "io.circe" %% "circe-generic" % circeVersion,
+    "io.circe" %% "circe-parser" % circeVersion
   )
 )

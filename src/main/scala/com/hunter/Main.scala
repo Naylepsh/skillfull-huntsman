@@ -1,11 +1,10 @@
 package com.hunter
 
-import cats.effect.IOApp
-import cats.effect.IO
+import cats.syntax.all._
+import cats.effect._
 
-object Main extends IOApp.Simple {
+object Main extends IOApp {
 
-  // This is your new "main"!
-  def run: IO[Unit] =
-    HelloWorld.say().flatMap(IO.println)
+  def run(args: List[String]): IO[ExitCode] =
+    IO.println(args).as(ExitCode.Success)
 }
