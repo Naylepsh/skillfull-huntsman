@@ -11,6 +11,7 @@ import io.circe.syntax._
 import com.hunter.domain.ExperienceLevel
 import com.hunter.domain.Offer
 import cats.data.OptionT
+import sttp.model.Uri
 
 package object JustJoinIt {
   object JustJoinItScraper extends Scraper {
@@ -36,7 +37,7 @@ package object JustJoinIt {
         experienceLevel: ExperienceLevel
     )(offers: List[OfferSummary]) = {
       val detailedOffers = offers
-        .mapFilter[IO[Either[String, OfferDetailed]]] {
+        .mapFilter[IO[Either[String, (OfferDetailed, Uri)]]] {
           case offer @ OfferSummary(id, _, _, _)
               if offer.matchesRequirements(language, experienceLevel) =>
             getOfferDetails(id).some
@@ -45,8 +46,8 @@ package object JustJoinIt {
         .sequence
 
       detailedOffers.map(_.mapFilter[Offer] {
-        case Right(offer) =>
-          OfferDetailed.toOffer(offer, experienceLevel).some
+        case Right((offer, url)) =>
+          OfferDetailed.toOffer(offer, experienceLevel, url.toString).some
         case Left(reason) => {
           println(reason)
           None
@@ -62,16 +63,22 @@ package object JustJoinIt {
       response.body.flatMap(decode[List[OfferSummary]]).left.map(_.toString)
     }
 
-    private def getOfferDetails(id: String): IO[Either[String, OfferDetailed]] =
+    private def getOfferDetails(
+        id: String
+    ): IO[Either[String, (OfferDetailed, Uri)]] =
       IO {
         println(s"Getting an offer for $id...")
 
         val backend = HttpClientSyncBackend()
-        val request =
-          basicRequest.get(uri"https://justjoin.it/api/offers/$id")
+        val url = uri"https://justjoin.it/api/offers/$id"
+        val request = basicRequest.get(url)
 
         val response = request.send(backend)
-        response.body.flatMap(decode[OfferDetailed]).left.map(_.toString)
+        response.body
+          .flatMap(decode[OfferDetailed])
+          .map(offer => (offer, url))
+          .left
+          .map(_.toString)
       }
   }
 }

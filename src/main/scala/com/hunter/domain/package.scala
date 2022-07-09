@@ -11,6 +11,7 @@ package object domain {
   )
 
   case class Offer(
+      url: String,
       title: String,
       description: String,
       experienceLevel: ExperienceLevel,
