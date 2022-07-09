@@ -84,9 +84,12 @@ object JustJoinItScraper extends Scraper {
       language: String,
       experienceLevel: ExperienceLevel
   )(offer: OfferSummary): Boolean = {
-    val matchesExperienceLevel = parseExperienceLevel(offer.experience_level)
-      .map(_ == experienceLevel)
-      .isRight
+    val matchesExperienceLevel = parseExperienceLevel(
+      offer.experience_level
+    ) match {
+      case Right(`experienceLevel`) => true
+      case _                        => false
+    }
     val matchesLanguage = offer.skills.exists(_.name == language)
 
     return matchesExperienceLevel && matchesLanguage
