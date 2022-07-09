@@ -10,6 +10,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import com.hunter.domain.ExperienceLevel
 import com.hunter.domain.Offer
+import cats.data.OptionT
 
 package object JustJoinIt {
   object JustJoinItScraper extends Scraper {
@@ -20,49 +21,57 @@ package object JustJoinIt {
         s"Getting offers for language: $language and exp. level: $experienceLevel"
       )
 
-      getAllOffers()
-        .flatMap(getDetailedOffers(language, experienceLevel))
-        .map(_.mapFilter[Offer] {
-          case Some(offer) => OfferDetailed.toOffer(offer, experienceLevel).some
-          case None        => None
-        })
+      getAllOffers().flatMap(_ match {
+        case Right(offers) =>
+          getDetailsOfMatchingOffers(language, experienceLevel)(offers)
+        case Left(reason) => {
+          println(reason)
+          IO(List.empty)
+        }
+      })
     }
 
-    private def getAllOffers(): IO[List[OfferSummary]] = IO {
+    private def getDetailsOfMatchingOffers(
+        language: String,
+        experienceLevel: ExperienceLevel
+    )(offers: List[OfferSummary]) = {
+      val detailedOffers = offers
+        .mapFilter[IO[Either[String, OfferDetailed]]] {
+          case offer @ OfferSummary(id, _, _, _)
+              if offer.matchesRequirements(language, experienceLevel) =>
+            getOfferDetails(id).some
+          case _ => None
+        }
+        .sequence
+
+      detailedOffers.map(_.mapFilter[Offer] {
+        case Right(offer) =>
+          OfferDetailed.toOffer(offer, experienceLevel).some
+        case Left(reason) => {
+          println(reason)
+          None
+        }
+      })
+    }
+
+    private def getAllOffers(): IO[Either[String, List[OfferSummary]]] = IO {
       val backend = HttpClientSyncBackend()
       val request = basicRequest.get(uri"https://justjoin.it/api/offers")
 
       val response = request.send(backend)
-      response.body.flatMap(decode[List[OfferSummary]]) match {
-        case Left(_)       => List()
-        case Right(offers) => offers
-      }
+      response.body.flatMap(decode[List[OfferSummary]]).left.map(_.toString)
     }
 
-    private def getDetailedOffers(
-        language: String,
-        experienceLevel: ExperienceLevel
-    )(offers: List[OfferSummary]): IO[List[Option[OfferDetailed]]] = offers
-      .mapFilter[IO[Option[OfferDetailed]]] {
-        case offer @ OfferSummary(id, _, _, _)
-            if offer.matchesRequirements(language, experienceLevel) =>
-          getOffer(id).some
+    private def getOfferDetails(id: String): IO[Either[String, OfferDetailed]] =
+      IO {
+        println(s"Getting an offer for $id...")
 
-        case _ => None
+        val backend = HttpClientSyncBackend()
+        val request =
+          basicRequest.get(uri"https://justjoin.it/api/offers/$id")
+
+        val response = request.send(backend)
+        response.body.flatMap(decode[OfferDetailed]).left.map(_.toString)
       }
-      .sequence
-
-    private def getOffer(title: String): IO[Option[OfferDetailed]] = IO {
-      println(s"Getting an offer for $title...")
-
-      val backend = HttpClientSyncBackend()
-      val request = basicRequest.get(uri"https://justjoin.it/api/offers/$title")
-
-      val response = request.send(backend)
-      response.body.flatMap(decode[OfferDetailed]) match {
-        case Left(_)      => None
-        case Right(offer) => Some(offer)
-      }
-    }
   }
 }
