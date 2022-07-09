@@ -13,15 +13,31 @@ import sttp.model.Uri
 import com.hunter.domain.Requirement
 
 object JustJoinItScraper extends Scraper {
+  def getOffers(language: String)(
+      experienceLevel: ExperienceLevel
+  ): IO[List[Offer]] = {
+    println(
+      s"Getting offers for language: $language and exp. level: $experienceLevel"
+    )
+
+    getAllOffers()
+      .flatMap(getDetailedOffers(language, experienceLevel))
+      .map(_.mapFilter[Offer] {
+        case Some(offer) => OfferDetailed.toOffer(offer, experienceLevel).some
+        case None        => None
+      })
+
+  }
+
   case class Skill(name: String, level: Int)
 
-  // TODO: transform to TypeClass?
   object Skill {
     def toRequirement(skill: Skill): Requirement =
       Requirement(name = skill.name, level = skill.level)
   }
 
   case class OfferSummary(
+      id: String,
       title: String,
       experience_level: String,
       skills: List[Skill]
@@ -34,7 +50,6 @@ object JustJoinItScraper extends Scraper {
       experience_level: String
   )
 
-  // TODO: transform to TypeClass?
   object OfferDetailed {
     def toOffer(offer: OfferDetailed, experienceLevel: ExperienceLevel): Offer =
       Offer(
@@ -78,6 +93,8 @@ object JustJoinItScraper extends Scraper {
   }
 
   private def getOffer(title: String): IO[Option[OfferDetailed]] = IO {
+    println(s"Getting an offer for $title...")
+
     val backend = HttpClientSyncBackend()
     val request = basicRequest.get(uri"https://justjoin.it/api/offers/$title")
 
@@ -88,22 +105,16 @@ object JustJoinItScraper extends Scraper {
     }
   }
 
-  def getOffers(language: String)(
+  private def getDetailedOffers(
+      language: String,
       experienceLevel: ExperienceLevel
-  ): IO[List[Offer]] = {
-    def getDetailedOffers(offers: List[OfferSummary]) = offers
-      .mapFilter[IO[Option[OfferDetailed]]] {
-        case offer if matchesRequirements(language, experienceLevel)(offer) =>
-          getOffer(offer.title).some
-      }
-      .sequence
+  )(offers: List[OfferSummary]): IO[List[Option[OfferDetailed]]] = offers
+    .mapFilter[IO[Option[OfferDetailed]]] {
+      case offer @ OfferSummary(id, _, _, _)
+          if matchesRequirements(language, experienceLevel)(offer) =>
+        getOffer(id).some
 
-    getAllOffers()
-      .flatMap(getDetailedOffers)
-      .map(_.mapFilter[Offer] {
-        case Some(offer) => OfferDetailed.toOffer(offer, experienceLevel).some
-        case None        => None
-      })
-
-  }
+      case _ => None
+    }
+    .sequence
 }
