@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS requirements (
 );
 
 CREATE TABLE IF NOT EXISTS offers (
-  id UUID PRIMARY KEY,
-  url TEXT NOT NULL,
+  url TEXT PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   experience_level TEXT not NULL
@@ -12,11 +11,12 @@ CREATE TABLE IF NOT EXISTS offers (
 
 CREATE TABLE IF NOT EXISTS offer_requirements (
   id INTEGER PRIMARY KEY,
-  offer_id UUID NOT NULL,
+  offer_url UUID NOT NULL,
   requirement_name TEXT NOT NULL,
+  level INTEGER,
 
-  FOREIGN KEY (offer_id)
-    REFERENCES offers (id)
+  FOREIGN KEY (offer_url)
+    REFERENCES offers (url)
   FOREIGN KEY (requirement_name)
     REFERENCES requirements (name)
 );

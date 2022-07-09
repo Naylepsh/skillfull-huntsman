@@ -18,7 +18,6 @@ lazy val root = (project in file(".")).settings(
     "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
     "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
     "org.tpolecat" %% "doobie-core" % doobieVersion,
-    "org.tpolecat" %% "doobie-hikari" % doobieVersion,
     "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
