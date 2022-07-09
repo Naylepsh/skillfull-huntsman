@@ -5,4 +5,4 @@
 
 **/target
 
-database.sql
+database.*.sql
