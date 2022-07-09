@@ -11,11 +11,16 @@ case class OfferDetailed(
 )
 
 object OfferDetailed {
-  def toOffer(offer: OfferDetailed, experienceLevel: ExperienceLevel): Offer =
+  def toOffer(
+      offer: OfferDetailed,
+      experienceLevel: ExperienceLevel,
+      url: String
+  ): Offer =
     Offer(
       title = offer.title,
       description = offer.body,
       experienceLevel = experienceLevel,
+      url = url,
       requirements = offer.skills.map(Skill.toRequirement)
     )
 }
