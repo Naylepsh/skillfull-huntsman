@@ -20,3 +20,5 @@ lazy val root = (project in file(".")).settings(
     "io.circe" %% "circe-parser" % circeVersion
   )
 )
+
+scalacOptions += "-Ypartial-unification"
