@@ -2,7 +2,7 @@ package com.hunter
 
 import cats.syntax.all._
 import cats.effect._
-import scraper.JustJoinItScraper
+import scraper.JustJoinIt.JustJoinItScraper
 import domain.ExperienceLevel
 import com.hunter.domain.ExperienceLevel
 

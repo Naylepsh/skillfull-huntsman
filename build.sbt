@@ -13,8 +13,7 @@ lazy val root = (project in file(".")).settings(
     "org.typelevel" %% "cats-effect-kernel" % "3.3.12",
     // standard "effect" library (Queues, Console, Random etc.)
     "org.typelevel" %% "cats-effect-std" % "3.3.12",
-    "org.typelevel" %% "cats-effect-testing-specs2" % "1.4.0" % Test,
-    "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+    "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
     "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
