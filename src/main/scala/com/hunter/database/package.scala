@@ -7,7 +7,6 @@ import doobie._
 import doobie.implicits._
 import com.hunter.domain
 import com.hunter.domain.ExperienceLevel
-import java.util.UUID
 
 package object database {
   def createTransactor(
@@ -58,7 +57,4 @@ package object database {
         case ExperienceLevel.Senior => "senior"
       }
     })
-
-  given uuidMeta: Meta[UUID] =
-    Meta[String].imap[UUID](UUID.fromString)(_.toString)
 }

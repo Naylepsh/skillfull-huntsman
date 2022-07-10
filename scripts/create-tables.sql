@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS offers (
 
 CREATE TABLE IF NOT EXISTS offer_requirements (
   id INTEGER PRIMARY KEY,
-  offer_url UUID NOT NULL,
+  offer_url text NOT NULL,
   requirement_name TEXT NOT NULL,
   level INTEGER,
 
