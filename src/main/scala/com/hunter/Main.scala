@@ -6,14 +6,17 @@ import scraper.JustJoinIt.JustJoinItScraper
 import domain.ExperienceLevel
 import database.{createTransactor, save}
 import doobie.implicits._
+import com.typesafe.config._
 
 object Main extends IOApp {
 
   def run(args: List[String]): IO[ExitCode] = {
+    val conf = ConfigFactory.load("credentials")
+
     val transactor = createTransactor(
-      pathToDatabase = "database.live.sql",
-      username = "",
-      password = ""
+      pathToDatabase = conf.getString("database.path"),
+      username = conf.getString("database.username"),
+      password = conf.getString("database.password")
     )
 
     for {

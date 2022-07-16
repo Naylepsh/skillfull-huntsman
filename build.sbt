@@ -16,6 +16,7 @@ lazy val root = (project in file(".")).settings(
     // standard "effect" library (Queues, Console, Random etc.)
     "org.typelevel" %% "cats-effect-std" % catsEffectVersion,
     "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
+    "com.typesafe" % "config" % "1.4.2",
     "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
     "org.tpolecat" %% "doobie-core" % doobieVersion,
     "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
