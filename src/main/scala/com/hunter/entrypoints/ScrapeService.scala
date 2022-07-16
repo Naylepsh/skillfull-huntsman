@@ -15,33 +15,33 @@ import io.circe.syntax._
 import org.http4s.EntityDecoder
 import com.hunter.scraper.scrapeOffers
 import doobie.util.transactor.Transactor
-import com.hunter.scraper.JustJoinIt.JustJoinItScraper
 import com.hunter.domain.ExperienceLevel
 import org.http4s.Request
+import com.hunter.scraper.Scraper
 
 object ScrapeService {
-  def init(transactor: Transactor[IO]) = HttpRoutes
+  def init(transactor: Transactor[IO], scrapers: List[Scraper]) = HttpRoutes
     .of[IO] { case req @ POST -> Root / "scrape" =>
-      scrape(transactor, req)
+      startScraping(transactor, scrapers, req)
     }
     .orNotFound
 
   case class ScrapeBody(skillName: String, experienceLevel: String)
   given decoder: EntityDecoder[IO, ScrapeBody] = jsonOf[IO, ScrapeBody]
 
-  private def scrape(transactor: Transactor[IO], req: Request[IO]) = {
+  private def startScraping(
+      transactor: Transactor[IO],
+      scrapers: List[Scraper],
+      req: Request[IO]
+  ) = {
     req
       .as[ScrapeBody]
       .flatMap(body => {
         parseExperienceLevel(body.experienceLevel) match {
           case Left(reason) => BadRequest(reason)
           case Right(experienceLevel) =>
-            scrapeOffers(
-              JustJoinItScraper,
-              transactor,
-              body.skillName,
-              experienceLevel
-            ).start.flatMap(_ => Ok("Scraping request successfully sent"))
+            startScrapers(transactor, scrapers, body.skillName, experienceLevel)
+              .flatMap(_ => Ok("Scraping started successfully"))
         }
       })
   }
@@ -55,5 +55,24 @@ object ScrapeService {
       case "senior" => Right(ExperienceLevel.Senior)
       case other    => Left(s"Unknown skill level: $other")
     }
+
+  private def startScrapers(
+      transactor: Transactor[IO],
+      scrapers: List[Scraper],
+      skillName: String,
+      experienceLevel: ExperienceLevel
+  ) = {
+    scrapers
+      .map(scraper =>
+        scrapeOffers(
+          scraper,
+          transactor,
+          skillName,
+          experienceLevel
+        )
+      )
+      .sequence
+      .start
+  }
 
 }

@@ -15,20 +15,22 @@ import database.{createTransactor, save}
 import com.hunter.entrypoints.ScrapeService
 
 object Main extends IOApp {
-  val conf = ConfigFactory.load("credentials")
+  private val conf = ConfigFactory.load("credentials")
 
-  val transactor = createTransactor(
+  private val transactor = createTransactor(
     pathToDatabase = conf.getString("database.path"),
     username = conf.getString("database.username"),
     password = conf.getString("database.password")
   )
+
+  private val scrapers = List(JustJoinItScraper)
 
   def run(args: List[String]): IO[ExitCode] =
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp(ScrapeService.init(transactor))
+      .withHttpApp(ScrapeService.init(transactor, scrapers))
       .build
       .use(_ => IO.never)
       .as(ExitCode.Success)
