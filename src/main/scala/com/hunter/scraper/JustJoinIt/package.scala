@@ -39,7 +39,7 @@ package object JustJoinIt {
       val detailedOffers = offers
         .mapFilter[IO[Either[String, (OfferDetailed, Uri)]]] {
           case offer @ OfferSummary(id, _, _, _)
-              if offer.matchesRequirements(language, experienceLevel) =>
+              if offer.matchesSkills(language, experienceLevel) =>
             getOfferDetails(id).some
           case _ => None
         }

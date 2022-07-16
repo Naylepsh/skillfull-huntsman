@@ -27,12 +27,12 @@ package object database {
       sql"""INSERT OR IGNORE INTO offers(url, title, description, experience_level)
             |VALUES (${offer.url}, ${offer.title}, ${offer.description}, ${offer.experienceLevel.show})""".stripMargin.update.run.void
 
-    val saveRequirements = offer.requirements.map(save).sequence
+    val saveSkills = offer.skills.map(save).sequence
 
     for {
       _ <- saveOffer
-      _ <- saveRequirements
-      _ <- offer.requirements
+      _ <- saveSkills
+      _ <- offer.skills
         .map(save(offer.url))
         .sequence
     } yield ()
@@ -40,13 +40,13 @@ package object database {
 
   private def save(
       offerUrl: String
-  )(requirement: domain.Requirement): ConnectionIO[Unit] = {
-    sql"""INSERT INTO offer_requirements(offer_url, requirement_name, level) 
-         |VALUES ($offerUrl, ${requirement.name}, ${requirement.level})""".stripMargin.update.run.void
+  )(skill: domain.Skill): ConnectionIO[Unit] = {
+    sql"""INSERT INTO offer_skills(offer_url, skill_name, level) 
+         |VALUES ($offerUrl, ${skill.name}, ${skill.level})""".stripMargin.update.run.void
   }
 
-  private def save(requirement: domain.Requirement): ConnectionIO[Unit] = {
-    sql"INSERT OR IGNORE INTO requirements(name) VALUES (${requirement.name})".update.run.void
+  private def save(skill: domain.Skill): ConnectionIO[Unit] = {
+    sql"INSERT OR IGNORE INTO skills(name) VALUES (${skill.name})".update.run.void
   }
 
   given showExperienceLevel: Show[ExperienceLevel] =

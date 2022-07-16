@@ -13,6 +13,7 @@ import scraper.JustJoinIt.JustJoinItScraper
 import domain.ExperienceLevel
 import database.{createTransactor, save}
 import com.hunter.entrypoints.ScrapeService
+import com.hunter.entrypoints.RelatedSkillsService
 
 object Main extends IOApp {
   private val conf = ConfigFactory.load("credentials")
@@ -25,12 +26,17 @@ object Main extends IOApp {
 
   private val scrapers = List(JustJoinItScraper)
 
+  private val services =
+    ScrapeService.init(transactor, scrapers) <+> RelatedSkillsService.init(
+      transactor
+    )
+
   def run(args: List[String]): IO[ExitCode] =
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp(ScrapeService.init(transactor, scrapers))
+      .withHttpApp(services.orNotFound)
       .build
       .use(_ => IO.never)
       .as(ExitCode.Success)

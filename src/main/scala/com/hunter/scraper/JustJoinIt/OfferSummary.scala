@@ -8,7 +8,7 @@ case class OfferSummary(
     experience_level: String,
     skills: List[Skill]
 ) {
-  def matchesRequirements(
+  def matchesSkills(
       language: String,
       experienceLevel: ExperienceLevel
   ): Boolean =

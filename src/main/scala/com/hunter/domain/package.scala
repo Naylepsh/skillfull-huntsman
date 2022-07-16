@@ -5,7 +5,7 @@ package object domain {
   enum ExperienceLevel:
     case Junior, Mid, Senior
 
-  case class Requirement(
+  case class Skill(
       name: String,
       level: Int
   )
@@ -15,7 +15,7 @@ package object domain {
       title: String,
       description: String,
       experienceLevel: ExperienceLevel,
-      requirements: List[Requirement]
+      skills: List[Skill]
   )
 
 }

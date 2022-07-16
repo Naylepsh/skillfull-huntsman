@@ -21,6 +21,6 @@ object OfferDetailed {
       description = offer.body,
       experienceLevel = experienceLevel,
       url = url,
-      requirements = offer.skills.map(Skill.toRequirement)
+      skills = offer.skills.map(Skill.toDomainModel)
     )
 }

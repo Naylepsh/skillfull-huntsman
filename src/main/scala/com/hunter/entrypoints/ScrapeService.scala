@@ -24,7 +24,6 @@ object ScrapeService {
     .of[IO] { case req @ POST -> Root / "scrape" =>
       startScraping(transactor, scrapers, req)
     }
-    .orNotFound
 
   case class ScrapeBody(skillName: String, experienceLevel: String)
   given decoder: EntityDecoder[IO, ScrapeBody] = jsonOf[IO, ScrapeBody]

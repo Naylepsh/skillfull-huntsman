@@ -1,10 +1,10 @@
 package com.hunter.scraper.JustJoinIt
 
-import com.hunter.domain.Requirement
+import com.hunter.domain
 
 case class Skill(name: String, level: Int)
 
 object Skill {
-  def toRequirement(skill: Skill): Requirement =
-    Requirement(name = skill.name, level = skill.level)
+  def toDomainModel(skill: Skill): domain.Skill =
+    domain.Skill(name = skill.name, level = skill.level)
 }

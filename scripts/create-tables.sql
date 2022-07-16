@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS requirements (
+CREATE TABLE IF NOT EXISTS skills (
   name TEXT PRIMARY KEY
 );
 
@@ -9,14 +9,14 @@ CREATE TABLE IF NOT EXISTS offers (
   experience_level TEXT not NULL
 );
 
-CREATE TABLE IF NOT EXISTS offer_requirements (
+CREATE TABLE IF NOT EXISTS offer_skills (
   id INTEGER PRIMARY KEY,
   offer_url text NOT NULL,
-  requirement_name TEXT NOT NULL,
+  skill_name TEXT NOT NULL,
   level INTEGER,
 
   FOREIGN KEY (offer_url)
     REFERENCES offers (url)
-  FOREIGN KEY (requirement_name)
-    REFERENCES requirements (name)
+  FOREIGN KEY (skill_name)
+    REFERENCES skills (name)
 );

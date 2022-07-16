@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterEach
 import com.hunter.domain.Offer
 import com.hunter.domain.ExperienceLevel
-import com.hunter.domain.Requirement
+import com.hunter.domain.Skill
 import doobie._
 import doobie.implicits._
 
@@ -14,14 +14,14 @@ class DatabaseSpec extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
   import cats.effect.unsafe.implicits.global
 
   override protected def beforeEach(): Unit = {
-    val deleteOfferRequirements = sql"delete from offer_requirements".update.run
+    val deleteOfferSkills = sql"delete from offer_skills".update.run
     val deleteOffers = sql"delete from offers".update.run
-    val deleteRequirements = sql"delete from requirements".update.run
+    val deleteSkills = sql"delete from skills".update.run
 
     val teardown = for {
-      _ <- deleteOfferRequirements
+      _ <- deleteOfferSkills
       _ <- deleteOffers
-      _ <- deleteRequirements
+      _ <- deleteSkills
     } yield ()
 
     teardown.transact(transactor).unsafeRunSync()
@@ -33,7 +33,7 @@ class DatabaseSpec extends AnyFlatSpec with Matchers with BeforeAndAfterEach {
       title = "Some Offer",
       description = "N/A",
       experienceLevel = ExperienceLevel.Junior,
-      requirements = List(Requirement(name = "Scala", level = 5))
+      skills = List(Skill(name = "Scala", level = 5))
     )
 
     save(offer).transact(transactor).unsafeRunSync()
