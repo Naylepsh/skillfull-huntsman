@@ -14,6 +14,7 @@ import domain.ExperienceLevel
 import database.{createTransactor, save}
 import com.hunter.entrypoints.ScrapeService
 import com.hunter.entrypoints.RelatedSkillsService
+import cats.data.Kleisli
 
 object Main extends IOApp {
   private val conf = ConfigFactory.load("credentials")
@@ -31,12 +32,15 @@ object Main extends IOApp {
       transactor
     )
 
+  private val app =
+    services.orNotFound.onError(error => Kleisli { _ => IO.println(error) })
+
   def run(args: List[String]): IO[ExitCode] =
     EmberServerBuilder
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp(services.orNotFound)
+      .withHttpApp(app)
       .build
       .use(_ => IO.never)
       .as(ExitCode.Success)

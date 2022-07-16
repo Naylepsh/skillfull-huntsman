@@ -22,10 +22,33 @@ package object database {
     )
   }
 
+  case class RelatedSkill(name: String, count: Int)
+
+  def getRelatedSkills(
+      skillName: String,
+      experienceLevel: ExperienceLevel
+  ): ConnectionIO[List[RelatedSkill]] = {
+    sql"""
+      | SELECT related_skills.name as name, COUNT(*) as count
+      | FROM skills 
+      | JOIN offer_skills on offer_skills.skill_name = skills.name
+      | JOIN offers on offers.url = offer_skills.offer_url
+      | JOIN offer_skills related_oss on related_oss.offer_url = offer_skills.offer_url
+      | JOIN skills related_skills on related_skills.name = related_oss.skill_name
+      | WHERE skills.name = ${skillName}
+      |   AND offers.experience_level = ${experienceLevel.show}
+      |   AND related_skills.name != ${skillName}
+      | GROUP BY related_skills.name
+      | ORDER BY count desc
+      """.stripMargin.query[RelatedSkill].to[List]
+  }
+
   def save(offer: domain.Offer): ConnectionIO[Unit] = {
     val saveOffer =
-      sql"""INSERT OR IGNORE INTO offers(url, title, description, experience_level)
-            |VALUES (${offer.url}, ${offer.title}, ${offer.description}, ${offer.experienceLevel.show})""".stripMargin.update.run.void
+      sql"""
+      | INSERT OR IGNORE INTO offers(url, title, description, experience_level)
+      | VALUES (${offer.url}, ${offer.title}, ${offer.description}, ${offer.experienceLevel.show})
+      |""".stripMargin.update.run.void
 
     val saveSkills = offer.skills.map(save).sequence
 
@@ -41,8 +64,10 @@ package object database {
   private def save(
       offerUrl: String
   )(skill: domain.Skill): ConnectionIO[Unit] = {
-    sql"""INSERT INTO offer_skills(offer_url, skill_name, level) 
-         |VALUES ($offerUrl, ${skill.name}, ${skill.level})""".stripMargin.update.run.void
+    sql"""
+    | INSERT INTO offer_skills(offer_url, skill_name, level) 
+    | VALUES ($offerUrl, ${skill.name}, ${skill.level})
+    |""".stripMargin.update.run.void
   }
 
   private def save(skill: domain.Skill): ConnectionIO[Unit] = {

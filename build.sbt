@@ -28,5 +28,6 @@ lazy val root = (project in file(".")).settings(
     "org.http4s" %% "http4s-ember-server" % http4sVersion,
     "org.http4s" %% "http4s-ember-client" % http4sVersion,
     "org.http4s" %% "http4s-circe" % http4sVersion,
+    "org.slf4j" % "slf4j-simple" % "1.7.36"
   )
 )
