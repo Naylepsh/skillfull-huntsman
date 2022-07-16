@@ -4,6 +4,7 @@ ThisBuild / scalaVersion := "3.1.2"
 val circeVersion = "0.14.1"
 val catsEffectVersion = "3.3.12"
 val doobieVersion = "1.0.0-RC1"
+val http4sVersion = "1.0.0-M34"
 
 lazy val root = (project in file(".")).settings(
   name := "skillfull-huntsman",
@@ -22,6 +23,10 @@ lazy val root = (project in file(".")).settings(
     "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
     "io.circe" %% "circe-core" % circeVersion,
     "io.circe" %% "circe-generic" % circeVersion,
-    "io.circe" %% "circe-parser" % circeVersion
+    "io.circe" %% "circe-parser" % circeVersion,
+    "org.http4s" %% "http4s-dsl" % http4sVersion,
+    "org.http4s" %% "http4s-ember-server" % http4sVersion,
+    "org.http4s" %% "http4s-ember-client" % http4sVersion,
+    "org.http4s" %% "http4s-circe" % http4sVersion,
   )
 )
