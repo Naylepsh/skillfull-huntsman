@@ -15,16 +15,16 @@ import sttp.model.Uri
 
 package object JustJoinIt {
   object JustJoinItScraper extends Scraper {
-    def getOffers(language: String)(
+    def getOffers(skill: String)(
         experienceLevel: ExperienceLevel
     ): IO[List[Offer]] = {
       println(
-        s"Getting offers for language: $language and exp. level: $experienceLevel"
+        s"Getting offers for skill: $skill and exp. level: $experienceLevel"
       )
 
       getAllOffers().flatMap(_ match {
         case Right(offers) =>
-          getDetailsOfMatchingOffers(language, experienceLevel)(offers)
+          getDetailsOfMatchingOffers(skill, experienceLevel)(offers)
         case Left(reason) => {
           println(reason)
           IO(List.empty)
@@ -33,13 +33,13 @@ package object JustJoinIt {
     }
 
     private def getDetailsOfMatchingOffers(
-        language: String,
+        skill: String,
         experienceLevel: ExperienceLevel
     )(offers: List[OfferSummary]) = {
       val detailedOffers = offers
         .mapFilter[IO[Either[String, (OfferDetailed, Uri)]]] {
           case offer @ OfferSummary(id, _, _, _)
-              if offer.matchesSkills(language, experienceLevel) =>
+              if offer.matchesSkills(skill, experienceLevel) =>
             getOfferDetails(id).some
           case _ => None
         }

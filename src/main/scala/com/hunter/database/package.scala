@@ -35,9 +35,9 @@ package object database {
       | JOIN offers on offers.url = offer_skills.offer_url
       | JOIN offer_skills related_oss on related_oss.offer_url = offer_skills.offer_url
       | JOIN skills related_skills on related_skills.name = related_oss.skill_name
-      | WHERE skills.name = ${skillName}
-      |   AND offers.experience_level = ${experienceLevel.show}
-      |   AND related_skills.name != ${skillName}
+      | WHERE skills.name = ${skillName} COLLATE NOCASE
+      |   AND offers.experience_level = ${experienceLevel.show} COLLATE NOCASE
+      |   AND related_skills.name != ${skillName} COLLATE NOCASE
       | GROUP BY related_skills.name
       | ORDER BY count desc
       """.stripMargin.query[RelatedSkill].to[List]
