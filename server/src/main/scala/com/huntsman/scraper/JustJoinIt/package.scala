@@ -1,4 +1,4 @@
-package com.hunter.scraper
+package com.huntsman.scraper
 
 import cats.implicits._
 import cats.effect._
@@ -8,8 +8,8 @@ import io.circe._
 import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
-import com.hunter.domain.ExperienceLevel
-import com.hunter.domain.Offer
+import com.huntsman.domain.ExperienceLevel
+import com.huntsman.domain.Offer
 import cats.data.OptionT
 import sttp.model.Uri
 

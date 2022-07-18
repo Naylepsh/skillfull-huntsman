@@ -1,12 +1,12 @@
-package com.hunter
+package com.huntsman
 
 import cats._
 import cats.implicits._
 import cats.effect.IO
 import doobie._
 import doobie.implicits._
-import com.hunter.domain
-import com.hunter.domain.ExperienceLevel
+import com.huntsman.domain
+import com.huntsman.domain.ExperienceLevel
 
 package object database {
   def createTransactor(

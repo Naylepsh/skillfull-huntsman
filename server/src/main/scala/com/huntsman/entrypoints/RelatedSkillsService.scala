@@ -1,4 +1,4 @@
-package com.hunter.entrypoints
+package com.huntsman.entrypoints
 
 import doobie.util.transactor.Transactor
 import doobie.implicits._
@@ -10,7 +10,7 @@ import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.ember.server._
-import com.hunter.database.{getRelatedSkills, RelatedSkill}
+import com.huntsman.database.{getRelatedSkills, RelatedSkill}
 import io.circe.generic.auto._
 import io.circe.syntax._
 

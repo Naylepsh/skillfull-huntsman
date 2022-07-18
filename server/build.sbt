@@ -1,4 +1,4 @@
-ThisBuild / organization := "com.example"
+ThisBuild / organization := "com.huntsman"
 ThisBuild / scalaVersion := "3.1.2"
 
 val circeVersion = "0.14.1"

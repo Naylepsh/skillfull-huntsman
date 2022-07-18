@@ -1,6 +1,6 @@
-package com.hunter.scraper.JustJoinIt
+package com.huntsman.scraper.JustJoinIt
 
-import com.hunter.domain
+import com.huntsman.domain
 
 case class Skill(name: String, level: Int)
 

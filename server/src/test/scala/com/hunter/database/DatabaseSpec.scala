@@ -1,11 +1,11 @@
-package com.hunter.database
+package com.huntsman.database
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.BeforeAndAfterEach
-import com.hunter.domain.Offer
-import com.hunter.domain.ExperienceLevel
-import com.hunter.domain.Skill
+import com.huntsman.domain.Offer
+import com.huntsman.domain.ExperienceLevel
+import com.huntsman.domain.Skill
 import doobie._
 import doobie.implicits._
 

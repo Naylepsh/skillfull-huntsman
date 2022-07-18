@@ -1,4 +1,4 @@
-package com.hunter.entrypoints
+package com.huntsman.entrypoints
 
 import cats.syntax.all._
 import cats.effect._
@@ -13,11 +13,11 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.http4s.EntityDecoder
-import com.hunter.scraper.scrapeOffers
+import com.huntsman.scraper.scrapeOffers
 import doobie.util.transactor.Transactor
-import com.hunter.domain.ExperienceLevel
+import com.huntsman.domain.ExperienceLevel
 import org.http4s.Request
-import com.hunter.scraper.Scraper
+import com.huntsman.scraper.Scraper
 
 object ScrapeService {
   def init(transactor: Transactor[IO], scrapers: List[Scraper]) = HttpRoutes

@@ -1,4 +1,4 @@
-package com.hunter
+package com.huntsman
 
 package object domain {
 

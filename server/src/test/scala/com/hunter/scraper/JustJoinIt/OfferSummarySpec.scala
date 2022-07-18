@@ -1,9 +1,9 @@
-package com.hunter.scraper.JustJoinIt
+package com.huntsman.scraper.JustJoinIt
 
 import cats.effect._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.flatspec.AnyFlatSpec
-import com.hunter.domain.ExperienceLevel
+import com.huntsman.domain.ExperienceLevel
 
 class OfferSummarySpec extends AnyFlatSpec with Matchers {
   import OfferSummarySpec._

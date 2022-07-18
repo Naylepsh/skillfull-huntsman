@@ -1,6 +1,6 @@
-package com.hunter
+package com.huntsman
 
-import com.hunter.domain.ExperienceLevel
+import com.huntsman.domain.ExperienceLevel
 
 package object entrypoints {
   def parseExperienceLevel(

@@ -1,6 +1,6 @@
-package com.hunter
+package com.huntsman
 
-import com.hunter.domain.{ExperienceLevel, Offer}
+import com.huntsman.domain.{ExperienceLevel, Offer}
 import cats.effect._
 import cats.syntax.all._
 import database.{createTransactor, save}

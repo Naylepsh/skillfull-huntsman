@@ -1,4 +1,4 @@
-package com.hunter
+package com.huntsman
 
 import cats.syntax.all._
 import cats.effect._
@@ -12,8 +12,8 @@ import org.http4s.ember.server._
 import scraper.JustJoinIt.JustJoinItScraper
 import domain.ExperienceLevel
 import database.{createTransactor, save}
-import com.hunter.entrypoints.ScrapeService
-import com.hunter.entrypoints.RelatedSkillsService
+import com.huntsman.entrypoints.ScrapeService
+import com.huntsman.entrypoints.RelatedSkillsService
 import cats.data.Kleisli
 import org.http4s.server.middleware._
 

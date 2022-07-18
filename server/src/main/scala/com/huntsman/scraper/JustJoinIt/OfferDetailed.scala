@@ -1,7 +1,7 @@
-package com.hunter.scraper.JustJoinIt
+package com.huntsman.scraper.JustJoinIt
 
-import com.hunter.domain.ExperienceLevel
-import com.hunter.domain.Offer
+import com.huntsman.domain.ExperienceLevel
+import com.huntsman.domain.Offer
 
 case class OfferDetailed(
     body: String,
