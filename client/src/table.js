@@ -22,7 +22,7 @@ const headerCell = tableCell("th");
 const dataCell = tableCell("td");
 
 export const createSkillsTable = (tableClassName) => (skills) => {
-  const headerRow = tableRow([headerCell("skill"), headerCell("count")]);
+  const headerRow = tableRow([headerCell("Skill"), headerCell("Count")]);
   const skillRows = skills.map((skill) =>
     tableRow([dataCell(skill.name), dataCell(skill.count)])
   );
