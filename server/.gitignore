@@ -1,0 +1,10 @@
+.vscode/
+
+.metals/
+.bloop/
+
+**/target
+
+**/resources/credentials.conf
+
+database.*.sql
