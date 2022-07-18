@@ -15,6 +15,7 @@ import database.{createTransactor, save}
 import com.hunter.entrypoints.ScrapeService
 import com.hunter.entrypoints.RelatedSkillsService
 import cats.data.Kleisli
+import org.http4s.server.middleware._
 
 object Main extends IOApp {
   private val conf = ConfigFactory.load("credentials")
@@ -33,7 +34,10 @@ object Main extends IOApp {
     )
 
   private val app =
-    services.orNotFound.onError(error => Kleisli { _ => IO.println(error) })
+    CORS.policy.withAllowOriginAll
+      .apply(services)
+      .orNotFound
+      .onError(error => Kleisli { _ => IO.println(error) })
 
   def run(args: List[String]): IO[ExitCode] =
     EmberServerBuilder
