@@ -19,6 +19,7 @@ lazy val root = (project in file(".")).settings(
     "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
     "com.typesafe" % "config" % "1.4.2",
     "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
+    "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats" % "3.7.1",
     "org.tpolecat" %% "doobie-core" % doobieVersion,
     "org.xerial" % "sqlite-jdbc" % "3.36.0.3",
     "io.circe" %% "circe-core" % circeVersion,
@@ -28,6 +29,7 @@ lazy val root = (project in file(".")).settings(
     "org.http4s" %% "http4s-ember-server" % http4sVersion,
     "org.http4s" %% "http4s-ember-client" % http4sVersion,
     "org.http4s" %% "http4s-circe" % http4sVersion,
-    "org.slf4j" % "slf4j-simple" % "1.7.36"
+    "org.slf4j" % "slf4j-simple" % "1.7.36",
+    "org.jsoup" % "jsoup" % "1.15.2"
   )
 )
