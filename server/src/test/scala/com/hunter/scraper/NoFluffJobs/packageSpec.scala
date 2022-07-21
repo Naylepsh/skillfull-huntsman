@@ -11,7 +11,7 @@ import com.huntsman.domain.ExperienceLevel
 class packageSpec extends AnyFlatSpec with Matchers {
   "parseOfferListHTML" should "return a bunch of offer urls for a popular technology" in {
     val htmlE = NoFluffJobsScraper
-      .getOfferListHTML("Python", ExperienceLevel.Mid)
+      .getOfferListHTML("Python", ExperienceLevel.Mid)(page = 1)
       .unsafeRunSync()
 
     htmlE.isRight shouldBe true

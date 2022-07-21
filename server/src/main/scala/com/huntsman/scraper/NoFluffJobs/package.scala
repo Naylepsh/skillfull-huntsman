@@ -10,7 +10,6 @@ import org.jsoup.Jsoup
 import scala.util.Try
 import collection.JavaConverters._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
-import cats.data.EitherT
 
 package object NoFluffJobs {
   object NoFluffJobsScraper extends Scraper {
@@ -19,34 +18,24 @@ package object NoFluffJobs {
         experienceLevel: ExperienceLevel
     ): IO[List[Offer]] = ???
 
-    def getOfferList(
+    def getOfferUrls(
         language: String,
-        experienceLevel: ExperienceLevel,
-        page: Int = 1,
-        urls: List[String] = List()
+        experienceLevel: ExperienceLevel
     ): IO[Either[String, List[String]]] = {
-      getOfferListHTML(language, experienceLevel).flatMap(_ match {
-        case Left(reason) => IO(Left(reason))
+      val initialPage = 1
+      val initialUrls = List[String]()
 
-        case Right(html) => {
-          parseOfferListHTML(html) match {
-            case Right(OfferListResult(newUrls, None)) => {
-              IO(Right(newUrls ::: urls))
-            }
-
-            case Right(OfferListResult(newUrls, Some(nextPageUrl))) => {
-              getOfferList(language, experienceLevel, page + 1)
-            }
-
-            case Left(reason) => IO(Left(reason.toString))
-          }
-        }
-      })
+      NoFluffJobs.getOfferUrls(
+        config = GetOfferListConfig(
+          getHTML = getOfferListHTML(language, experienceLevel) _,
+          parseHTML = parseOfferListHTML _
+        ),
+        language,
+        experienceLevel
+      )(initialPage, initialUrls)
     }
 
-    case class OfferListResult(urls: List[String], nextPageUrl: Option[String])
-
-    def parseOfferListHTML(html: String): Either[Throwable, OfferListResult] =
+    def parseOfferListHTML(html: String): Either[String, OfferListResult] =
       Try {
         val doc = Jsoup.parse(html)
         val detailedOfferUrls =
@@ -59,11 +48,9 @@ package object NoFluffJobs {
           .map(_.attr("href"))
 
         OfferListResult(detailedOfferUrls, nextPageUrl)
-      }.toEither
+      }.toEither.left.map(_.toString)
 
-    def getOfferListHTML(
-        skill: String,
-        experienceLevel: ExperienceLevel,
+    def getOfferListHTML(skill: String, experienceLevel: ExperienceLevel)(
         page: Int = 1
     ): IO[Either[String, String]] = {
       AsyncHttpClientCatsBackend[IO]().flatMap(backend => {
@@ -74,6 +61,46 @@ package object NoFluffJobs {
         request.send(backend).map(_.body)
       })
     }
+  }
+
+  case class OfferListResult(urls: List[String], nextPageUrl: Option[String])
+
+  case class GetOfferListConfig(
+      getHTML: Int => IO[Either[String, String]],
+      parseHTML: String => Either[String, OfferListResult]
+  )
+
+  def getOfferUrls(
+      config: GetOfferListConfig,
+      language: String,
+      experienceLevel: ExperienceLevel
+  ) = {
+    def crawl(
+        page: Int,
+        urls: List[String]
+    ): IO[Either[String, List[String]]] = {
+      config
+        .getHTML(page)
+        .flatMap(_ match {
+          case Left(reason) => IO(Left(reason))
+
+          case Right(html) => {
+            config.parseHTML(html) match {
+              case Right(OfferListResult(newUrls, None)) => {
+                IO(Right(newUrls ::: urls))
+              }
+
+              case Right(OfferListResult(newUrls, Some(nextPageUrl))) => {
+                crawl(page + 1, newUrls ::: urls)
+              }
+
+              case Left(reason) => IO(Left(reason))
+            }
+          }
+        })
+    }
+
+    crawl
   }
 
   given showExperienceLevel: Show[ExperienceLevel] = new Show[ExperienceLevel] {
