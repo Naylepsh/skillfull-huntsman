@@ -10,6 +10,7 @@ import org.jsoup.Jsoup
 import scala.util.Try
 import collection.JavaConverters._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import cats.data.EitherT
 
 package object NoFluffJobs {
   object NoFluffJobsScraper extends Scraper {
@@ -18,8 +19,29 @@ package object NoFluffJobs {
         experienceLevel: ExperienceLevel
     ): IO[List[Offer]] = ???
 
-    def getOfferList(language: String, experienceLevel: ExperienceLevel) = {
-      getOfferListHTML(language, experienceLevel)
+    def getOfferList(
+        language: String,
+        experienceLevel: ExperienceLevel,
+        page: Int = 1,
+        urls: List[String] = List()
+    ): IO[Either[String, List[String]]] = {
+      getOfferListHTML(language, experienceLevel).flatMap(_ match {
+        case Left(reason) => IO(Left(reason))
+
+        case Right(html) => {
+          parseOfferListHTML(html) match {
+            case Right(OfferListResult(newUrls, None)) => {
+              IO(Right(newUrls ::: urls))
+            }
+
+            case Right(OfferListResult(newUrls, Some(nextPageUrl))) => {
+              getOfferList(language, experienceLevel, page + 1)
+            }
+
+            case Left(reason) => IO(Left(reason.toString))
+          }
+        }
+      })
     }
 
     case class OfferListResult(urls: List[String], nextPageUrl: Option[String])
