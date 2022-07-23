@@ -1,7 +1,8 @@
 package com.huntsman.scraper
 
+import com.huntsman.domain
 import com.huntsman.domain.ExperienceLevel
-import com.huntsman.domain.Offer
+import com.huntsman.domain.Skill
 import sttp.client3._
 import cats._
 import cats.implicits._
@@ -10,13 +11,43 @@ import org.jsoup.Jsoup
 import scala.util.Try
 import collection.JavaConverters._
 import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
+import cats.data.EitherT
+import sttp.model.Uri
+import org.jsoup.nodes.Document
 
 package object NoFluffJobs {
   object NoFluffJobsScraper extends Scraper {
 
     override def getOffers(language: String)(
         experienceLevel: ExperienceLevel
-    ): IO[List[Offer]] = ???
+    ): IO[List[domain.Offer]] = {
+      val urlsT = EitherT[IO, String, List[String]](
+        getOfferUrls(language, experienceLevel)
+      )
+      urlsT
+        .flatMap(urls => {
+          val result = urls
+            .map(url => {
+              sendGetRequest(uri"$url").map(
+                _.flatMap(parseOfferHTML).map(offer =>
+                  Offer.toDomainOffer(offer, url, experienceLevel)
+                )
+              )
+            })
+            .sequence
+            .map(_.sequence)
+          EitherT[IO, String, List[domain.Offer]](result)
+        })
+        .value
+        .map(_ match {
+          case Right(offers) => offers
+
+          case Left(reason) => {
+            println(reason)
+            List.empty
+          }
+        })
+    }
 
     def getOfferUrls(
         language: String,
@@ -39,7 +70,11 @@ package object NoFluffJobs {
       Try {
         val doc = Jsoup.parse(html)
         val detailedOfferUrls =
-          doc.select(".posting-list-item").asScala.map(_.attr("href")).toList
+          doc
+            .select(".posting-list-item")
+            .asScala
+            .map(elem => s"""https://nofluffjobs.com${elem.attr("href")}""")
+            .toList
 
         val nextPage = doc
           .select(".page-item.active + .page-item")
@@ -51,15 +86,66 @@ package object NoFluffJobs {
 
     def getOfferListHTML(skill: String, experienceLevel: ExperienceLevel)(
         page: Int = 1
-    ): IO[Either[String, String]] = {
+    ): IO[Either[String, String]] = sendGetRequest(
+      uri"https://nofluffjobs.com/pl/${skill}?criteria=seniority%3D${experienceLevel.show}&page=${page}"
+    )
+
+    private def sendGetRequest(uri: Uri): IO[Either[String, String]] = {
+      println(s"Requesting $uri")
+
       AsyncHttpClientCatsBackend[IO]().flatMap(backend => {
-        val request = basicRequest.get(
-          uri"https://nofluffjobs.com/pl/${skill}?criteria=seniority%3D${experienceLevel.show}&page=${page}"
-        )
+        val request = basicRequest.get(uri)
 
         request.send(backend).map(_.body)
       })
     }
+
+    def parseOfferHTML(html: String): Either[String, Offer] = Try {
+      val doc = Jsoup.parse(html)
+
+      Offer(
+        title = getOfferTitle(doc),
+        generalDescription = getOfferGeneralDescription(doc),
+        tasksDescription = getOfferTasksDescription(doc),
+        skills = getOfferSkills(doc)
+      )
+    }.toEither.left.map(_.toString)
+
+    private def getOfferTitle(doc: Document): String =
+      doc.select(".posting-details-description h1").asScala.head.attr("text")
+
+    private def getOfferGeneralDescription(doc: Document): Option[String] = doc
+      .select("#posting-description")
+      .asScala
+      .headOption
+      .map(_.attr("text"))
+
+    private def getOfferTasksDescription(doc: Document): Option[String] = doc
+      .select("posting-tasks")
+      .asScala
+      .headOption
+      .map(_.attr("text"))
+
+    private def getOfferSkills(doc: Document): List[Skill] =
+      getOfferRequiredSkills(doc) ::: getOfferNiceToHaveSkills(doc)
+
+    private def getOfferRequiredSkills(doc: Document): List[Skill] = {
+      val skillLevel = doc.select("#posting-seniority svg").asScala.length - 1
+
+      doc
+        .select("common-posting-requirements")
+        .next
+        .select("common-posting-item-tag")
+        .asScala
+        .map(elem => Skill(elem.attr("text"), skillLevel))
+        .toList
+    }
+
+    private def getOfferNiceToHaveSkills(doc: Document): List[Skill] = doc
+      .select("#posting-nice-to-have common-posting-item-tag")
+      .asScala
+      .map(elem => Skill(elem.attr("text"), 1))
+      .toList
   }
 
   case class OfferListResult(urls: List[String], hasMore: Boolean)

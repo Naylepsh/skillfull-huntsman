@@ -9,9 +9,10 @@ import org.http4s.HttpRoutes
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.ember.server._
-import scraper.JustJoinIt.JustJoinItScraper
-import domain.ExperienceLevel
-import database.{createTransactor, save}
+import com.huntsman.scraper.JustJoinIt.JustJoinItScraper
+import com.huntsman.scraper.NoFluffJobs.NoFluffJobsScraper
+import com.huntsman.domain.ExperienceLevel
+import com.huntsman.database.{createTransactor, save}
 import com.huntsman.entrypoints.ScrapeService
 import com.huntsman.entrypoints.RelatedSkillsService
 import cats.data.Kleisli
@@ -26,7 +27,7 @@ object Main extends IOApp {
     password = conf.getString("database.password")
   )
 
-  private val scrapers = List(JustJoinItScraper)
+  private val scrapers = List(JustJoinItScraper, NoFluffJobsScraper)
 
   private val services =
     ScrapeService.init(transactor, scrapers) <+> RelatedSkillsService.init(
