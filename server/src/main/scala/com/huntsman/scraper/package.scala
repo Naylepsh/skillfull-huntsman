@@ -9,6 +9,7 @@ import doobie.util.transactor.Transactor
 
 package object scraper {
   trait Scraper {
+    // TODO: Change return type to IO[Either[String, List[Offer]]] and defer logging to the caller
     def getOffers(language: String)(
         experienceLevel: ExperienceLevel
     ): IO[List[Offer]]

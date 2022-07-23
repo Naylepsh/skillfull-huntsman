@@ -18,10 +18,6 @@ package object JustJoinIt {
     def getOffers(skill: String)(
         experienceLevel: ExperienceLevel
     ): IO[List[Offer]] = {
-      println(
-        s"Getting offers for skill: $skill and exp. level: $experienceLevel"
-      )
-
       getAllOffers().flatMap(_ match {
         case Right(offers) =>
           getDetailsOfMatchingOffers(skill, experienceLevel)(offers)
@@ -57,7 +53,9 @@ package object JustJoinIt {
 
     private def getAllOffers(): IO[Either[String, List[OfferSummary]]] = IO {
       val backend = HttpClientSyncBackend()
-      val request = basicRequest.get(uri"https://justjoin.it/api/offers")
+      val url = uri"https://justjoin.it/api/offers"
+      println(s"Requesting $url")
+      val request = basicRequest.get(url)
 
       val response = request.send(backend)
       response.body.flatMap(decode[List[OfferSummary]]).left.map(_.toString)
@@ -71,6 +69,7 @@ package object JustJoinIt {
 
         val backend = HttpClientSyncBackend()
         val url = uri"https://justjoin.it/api/offers/$id"
+        println(s"Requesting $url")
         val request = basicRequest.get(url)
 
         val response = request.send(backend)
