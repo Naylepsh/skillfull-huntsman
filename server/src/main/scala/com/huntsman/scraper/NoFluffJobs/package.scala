@@ -41,13 +41,12 @@ package object NoFluffJobs {
         val detailedOfferUrls =
           doc.select(".posting-list-item").asScala.map(_.attr("href")).toList
 
-        val nextPageUrl = doc
+        val nextPage = doc
           .select(".page-item.active + .page-item")
           .asScala
           .headOption
-          .map(_.attr("href"))
 
-        OfferListResult(detailedOfferUrls, nextPageUrl)
+        OfferListResult(detailedOfferUrls, nextPage.isDefined)
       }.toEither.left.map(_.toString)
 
     def getOfferListHTML(skill: String, experienceLevel: ExperienceLevel)(
@@ -63,7 +62,7 @@ package object NoFluffJobs {
     }
   }
 
-  case class OfferListResult(urls: List[String], nextPageUrl: Option[String])
+  case class OfferListResult(urls: List[String], hasMore: Boolean)
 
   case class GetOfferListConfig(
       getHTML: Int => IO[Either[String, String]],
@@ -86,11 +85,11 @@ package object NoFluffJobs {
 
           case Right(html) => {
             config.parseHTML(html) match {
-              case Right(OfferListResult(newUrls, None)) => {
+              case Right(OfferListResult(newUrls, false)) => {
                 IO(Right(newUrls ::: urls))
               }
 
-              case Right(OfferListResult(newUrls, Some(nextPageUrl))) => {
+              case Right(OfferListResult(newUrls, true)) => {
                 crawl(page + 1, newUrls ::: urls)
               }
 
