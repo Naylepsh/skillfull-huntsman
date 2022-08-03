@@ -26,16 +26,7 @@ package object NoFluffJobs {
       )
       urlsT
         .flatMap(urls => {
-          val result = urls
-            .map(url => {
-              sendGetRequest(uri"$url").map(
-                _.flatMap(parseOfferHTML).map(offer =>
-                  Offer.toDomainOffer(offer, url, experienceLevel)
-                )
-              )
-            })
-            .sequence
-            .map(_.sequence)
+          val result = getOffersDetails(urls, experienceLevel)
           EitherT[IO, String, List[domain.Offer]](result)
         })
         .value
@@ -47,6 +38,31 @@ package object NoFluffJobs {
             List.empty
           }
         })
+    }
+
+    private def getOffersDetails(
+        urls: List[String],
+        experienceLevel: ExperienceLevel
+    ): IO[Either[String, List[domain.Offer]]] = {
+      AsyncHttpClientCatsBackend[IO]().flatMap(backend => {
+        urls
+          .map(url => {
+            println(s"Requesting $url")
+
+            basicRequest
+              .get(uri"$url")
+              .send(backend)
+              .map(_.body.flatMap(body => {
+                println(s"Parsing body of $url")
+
+                parseOfferHTML(body).map(offer =>
+                  Offer.toDomainOffer(offer, url, experienceLevel)
+                )
+              }))
+          })
+          .sequence
+          .map(_.sequence)
+      })
     }
 
     def getOfferUrls(
