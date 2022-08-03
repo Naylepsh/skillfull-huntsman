@@ -27,8 +27,7 @@ object Main extends IOApp {
     password = conf.getString("database.password")
   )
 
-  // private val scrapers = List(JustJoinItScraper, NoFluffJobsScraper)
-  private val scrapers = List(NoFluffJobsScraper)
+  private val scrapers = List(JustJoinItScraper, NoFluffJobsScraper)
 
   private val services =
     ScrapeService.init(transactor, scrapers) <+> RelatedSkillsService.init(
