@@ -2,6 +2,7 @@ package com.huntsman.entrypoints
 
 import cats.syntax.all._
 import cats.effect._
+import cats.effect.implicits._
 import com.comcast.ip4s._
 import org.http4s.HttpRoutes
 import org.http4s.circe._
@@ -60,8 +61,7 @@ object ScrapeService {
           experienceLevel
         )
       )
-      .sequence
-      .start
+      .parTraverse { x => x }
   }
 
 }
